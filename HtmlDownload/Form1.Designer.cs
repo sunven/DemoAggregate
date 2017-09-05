@@ -35,15 +35,15 @@
             // 
             // txtUrl
             // 
-            this.txtUrl.Location = new System.Drawing.Point(47, 25);
+            this.txtUrl.Location = new System.Drawing.Point(12, 27);
             this.txtUrl.Name = "txtUrl";
-            this.txtUrl.Size = new System.Drawing.Size(100, 21);
+            this.txtUrl.Size = new System.Drawing.Size(392, 21);
             this.txtUrl.TabIndex = 0;
             this.txtUrl.Text = "https://www.baidufe.com/fehelper/endecode.html";
             // 
             // btnDown
             // 
-            this.btnDown.Location = new System.Drawing.Point(313, 25);
+            this.btnDown.Location = new System.Drawing.Point(410, 27);
             this.btnDown.Name = "btnDown";
             this.btnDown.Size = new System.Drawing.Size(75, 23);
             this.btnDown.TabIndex = 1;
@@ -53,10 +53,11 @@
             // 
             // txtResult
             // 
-            this.txtResult.Location = new System.Drawing.Point(101, 156);
+            this.txtResult.Location = new System.Drawing.Point(12, 54);
             this.txtResult.Multiline = true;
             this.txtResult.Name = "txtResult";
-            this.txtResult.Size = new System.Drawing.Size(275, 160);
+            this.txtResult.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtResult.Size = new System.Drawing.Size(473, 363);
             this.txtResult.TabIndex = 2;
             // 
             // Form1
