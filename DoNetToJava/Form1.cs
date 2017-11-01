@@ -28,9 +28,16 @@ namespace DoNetToJava
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //var list = Get();
+            GenInterface();
+        }
+
+        private void GenInterface()
+        {
             var javaInterfaceModelList = new List<JavaInterfaceModel>();
             var list = Get();
-            var customApi = list.FirstOrDefault(c => c.CodeBase.EndsWith("Viss.Client.CustomerApi.dll"));
+            var customApi = list.FirstOrDefault(c => c.CodeBase.EndsWith("Viss.Client.CustomerApi.dll")
+            );
             //Viss.Client.CustomerApi.Areas.WeChat.Controllers.AritificialApiController
             var controllerList = customApi.GetTypes()
                 .Where(c => c.FullName.StartsWith("Viss.Client.CustomerApi.Areas.WeChat.Controllers") && c.Name.EndsWith("ApiController"));
@@ -46,9 +53,37 @@ namespace DoNetToJava
             }
             foreach (var javaInterfaceModel in javaInterfaceModelList)
             {
-                GeneralPerformanceReport(@"D:\JavaFile\Java\" + javaInterfaceModel.InterfaceName + ".java", javaInterfaceModel);
+                GeneralPerformanceReport(@"D:\JavaFile\Java\I" + (javaInterfaceModel.InterfaceName.Replace("ApiController", "Service")) + ".java", javaInterfaceModel);
             }
-            var str = JsonConvert.SerializeObject(customApi);
+        }
+
+        private void GeneralModel(Type type, List<JavaClassModel> javaClassModelList)
+        {
+            foreach (var typeGenericTypeArgument in type.GenericTypeArguments)
+            {
+                if (typeGenericTypeArgument.BaseType.Name == "ValueType")
+                {
+                    continue;
+                }
+                if (type.Name == "List`1")
+                {
+                    //泛型 例如List<int>
+                    GeneralModel(typeGenericTypeArgument, javaClassModelList);
+                }
+                if (type.Name == "Dictionary`2")
+                {
+                    //字典
+                    GeneralModel(typeGenericTypeArgument, javaClassModelList);
+                }
+                var javaClassModel = new JavaClassModel
+                {
+                    ClassName = typeGenericTypeArgument.Name,
+                    PackageName = "caad.com.wechat",
+                    PropertyList = typeGenericTypeArgument.GetProperties().ToList()
+                };
+                javaClassModel.ImportList.Add("import org.codehaus.jackson.annotate.JsonProperty;");
+                javaClassModelList.Add(javaClassModel);
+            }
         }
 
         public static void GeneralPerformanceReport(string reportFilePath, JavaInterfaceModel model)
@@ -73,10 +108,49 @@ namespace DoNetToJava
 
         }
 
+        public static void GeneralJavaClass(string reportFilePath, JavaClassModel model)
+        {
+            var config =
+                new TemplateServiceConfiguration
+                {
+                    ReferenceResolver = new MyIReferenceResolver()
+                };
+            var service = RazorEngineService.Create(config);
+            var templateContent = File.ReadAllText(@"D:\DemoAggregate\DoNetToJava\Template\JavaClass.java");
+            var writer = new StringWriter();
+            service.RunCompile(templateContent, "TemplateKey", writer, null, model);
+            var content = writer.ToString();
+            File.WriteAllText(reportFilePath, content);
+
+        }
+
+        public static void GeneralJavaClass(string reportFilePath, string tempPath, object model)
+        {
+            var config =
+                new TemplateServiceConfiguration
+                {
+                    ReferenceResolver = new MyIReferenceResolver()
+                };
+            var service = RazorEngineService.Create(config);
+            var templateContent = File.ReadAllText(tempPath);
+            var writer = new StringWriter();
+            service.RunCompile(templateContent, "TemplateKey", writer, null, model);
+            var content = writer.ToString();
+            File.WriteAllText(reportFilePath, content);
+        }
+
+        public static void GeneralJavaClass(string reportFilePath, List<JavaClassModel> list)
+        {
+            list.ForEach(c =>
+            {
+                GeneralJavaClass(reportFilePath, c);
+            });
+        }
+
+
 
         private List<Assembly> Get()
         {
-
             var referencedAssemblies = Directory.GetFiles(@"C:\Work\DotNetTeamGit\Caad.Viss\Source\Client\Viss.Client.CustomerApi\bin", "*.*", SearchOption.AllDirectories)
                 .Where(item => item.EndsWith(".dll"))
                 .Select(item =>
@@ -89,43 +163,43 @@ namespace DoNetToJava
                     {
                         return null;
                     }
-                }).Where(c => c != null).ToList();
+                }).Where(c => c != null).DistinctBy(c => c.FullName).ToList();
             return referencedAssemblies;
-
-            //var path = @"C:\Work\DotNetTeamGit\Caad.Viss\SourceV2\Client\Viss.Client.Manager\bin\Viss.Client.Manager.dll";
-            //var ass = Assembly.LoadFrom(path);
-            //var listType = ass.GetTypes().Where(c => !c.Name.Contains("<")).OrderBy(c => c.Name);
-            //var list = new List<ZtreeNode>();
-            //var i = 1;
-            //foreach (var item in listType)
-            //{
-            //    list.Add(new ZtreeNode
-            //    {
-            //        id = i.ToString(),
-            //        pId = "00",
-            //        name = item.Name
-            //    });
-            //    var chid = i;
-            //    foreach (var itemType in item.GetProperties().OrderBy(c => c.Name))
-            //    {
-            //        var typeName = itemType.PropertyType.Name;
-            //        var args = itemType.PropertyType.GetGenericArguments();
-            //        if (args.Any())
-            //        {
-            //            typeName = args[0].Name + "?";
-            //        }
-            //        list.Add(new ZtreeNode
-            //        {
-            //            pId = chid.ToString(),
-            //            id = (++i).ToString(),
-            //            name = typeName + " " + itemType.Name
-            //        });
-            //    }
-            //    i++;
-            //}
-            //return list;
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //var fdb = new FolderBrowserDialog();
+            //if (fdb.ShowDialog() != DialogResult.OK)
+            //{
+            //    return;
+            //}
+            var dir = @"D:\JavaFile\Java";
+            var tempPath = @"D:\DemoAggregate\DoNetToJava\Template\JavaField.java";
+            var list = Get();
+            //Assembly.Load(assembly)
+            foreach (var assembly in list)
+            {
+                try
+                {
+                    var type = assembly.GetTypes().FirstOrDefault(c => c.Name == txtClassName.Text);
+                    if (type == null)
+                    {
+                        continue;
+                    }
+                    GeneralJavaClass(dir + "\\" + type.Name + ".java", tempPath, new JavaField
+                    {
+                        Type = type,
+                        HasJsonProperty = chkJsonProperty.Checked
+                    });
+                }
+                catch (ReflectionTypeLoadException exception)
+                {
+                    continue;
+                }
+
+            }
+        }
     }
 
     class MyIReferenceResolver : IReferenceResolver
@@ -150,7 +224,7 @@ namespace DoNetToJava
             yield return CompilerReference.From(FindLoaded(loadedAssemblies, "mscorlib.dll"));
             yield return CompilerReference.From(FindLoaded(loadedAssemblies, "System.dll"));
             yield return CompilerReference.From(FindLoaded(loadedAssemblies, "System.Core.dll"));
-            yield return CompilerReference.From(FindLoaded(loadedAssemblies, "Coralcode.Framework.dll"));;
+            yield return CompilerReference.From(FindLoaded(loadedAssemblies, "Coralcode.Framework.dll")); ;
             yield return CompilerReference.From(FindLoaded(loadedAssemblies, "RazorEngine.dll"));
             yield return CompilerReference.From(typeof(MyIReferenceResolver).Assembly); // Assembly
 

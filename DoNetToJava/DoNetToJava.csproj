@@ -122,12 +122,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\LinqExtensions.cs" />
+    <Compile Include="Common\Tool.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Model\JavaClassModel.cs" />
+    <Compile Include="Model\JavaField.cs" />
     <Compile Include="Model\JavaInterfaceModel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -158,6 +161,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Template\JavaField.java" />
+    <Content Include="Template\JavaClass.java" />
     <Content Include="Template\JavaInterface.java" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
