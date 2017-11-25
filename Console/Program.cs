@@ -12,7 +12,10 @@ namespace Console
     {
         static void Main(string[] args)
         {
-            System.Console.WriteLine(Path.GetExtension(null));
+            //System.Console.WriteLine(Path.GetExtension(null));
+            var c1=new Class1();
+            var c2=new Class2();
+            System.Console.WriteLine(c2.Get());
             System.Console.ReadKey();
         }
 
