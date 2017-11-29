@@ -224,7 +224,7 @@ namespace DoNetToJava
             yield return CompilerReference.From(FindLoaded(loadedAssemblies, "mscorlib.dll"));
             yield return CompilerReference.From(FindLoaded(loadedAssemblies, "System.dll"));
             yield return CompilerReference.From(FindLoaded(loadedAssemblies, "System.Core.dll"));
-            yield return CompilerReference.From(FindLoaded(loadedAssemblies, "Coralcode.Framework.dll")); ;
+            //yield return CompilerReference.From(FindLoaded(loadedAssemblies, "Coralcode.Framework.dll")); ;
             yield return CompilerReference.From(FindLoaded(loadedAssemblies, "RazorEngine.dll"));
             yield return CompilerReference.From(typeof(MyIReferenceResolver).Assembly); // Assembly
 
